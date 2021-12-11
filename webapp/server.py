@@ -46,16 +46,14 @@ def video_feed():
 
 @app.route('/submit',methods=['POST'])
 def submit():
-    image_str = request.args.get('image')
-    print(image_str)
-    #image_str = request.args.get('image').replace(' ', '+')
-    #image_str = image_str.split(',', maxsplit=1)[1]
-    #image_bytes = base64.b64decode(image_str.encode('ascii'))
+    image_str = request.args.get('image').replace(' ', '+')
+    image_str = image_str.split(',', maxsplit=1)[1]
+    image_bytes = base64.b64decode(image_str.encode('ascii'))
     #with open("screen.png", "wb") as f: f.write(image_bytes)
-    #
-    #im = Image.open(BytesIO(image_bytes))
-    #cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
-    ##cv2.imwrite("screen2.png", cv_image)
+    
+    im = Image.open(BytesIO(image_bytes))
+    cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
+    #cv2.imwrite("screen2.png", cv_image)
     return ""
 
 if __name__ == "__main__":
