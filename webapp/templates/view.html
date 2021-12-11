@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+    <title>PytBools Fake Detection</title>
+</head>
+<body>
+
+<div id = "content" class="container col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12">
+    <h3>Авторизация пользователя</h3>
+
+    <div>
+        {% block content %} {% endblock %}
+    </div>
+
+    <div class="row"> <!--class="alert alert-warning btn-toolbar col-md-12" role="toolbar"-->
+        <h4 class="alert-text col-md-4">FAKE / TRUE</h4>
+        <div id="check-btns" class="d-grid gap-2 d-md-flex justify-content-md-end col-md-6"><!--pull-right text-right-->
+            
+            <a id="check-again" class='btn btn-warning btn-lg me-md-2' href="/">
+                Ещё раз</a>
+            <button id="check-user" type="submit" class="btn btn-primary btn-lg">Распознать</button>
+        </div>
+
+        <div id="check-info" ><!--class="btn-group pull-left text-left"-->
+            <h4>Время распознавания: </h4>
+        </div>
+    </div>
+</div>
+    
+</body>
+</html>
