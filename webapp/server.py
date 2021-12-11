@@ -4,7 +4,6 @@ import face_recognition
 import cv2
 import numpy as np
 import base64 # для перевода из формата 
-import re
 from PIL import Image
 from io import BytesIO
 
@@ -49,8 +48,7 @@ def submit():
     image_str = request.args.get('image').replace(' ', '+')
     image_str = image_str.split(',', maxsplit=1)[1]
     image_bytes = base64.b64decode(image_str.encode('ascii'))
-    #with open("screen.png", "wb") as f: f.write(image_bytes)
-    
+    with open("screen.png", "wb") as f: f.write(image_bytes)
     im = Image.open(BytesIO(image_bytes))
     cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
     #cv2.imwrite("screen2.png", cv_image)
