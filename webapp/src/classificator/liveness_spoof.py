@@ -48,6 +48,7 @@ class LivenessSpoof:
         return e_x / e_x.sum()
 
     def postprocessing(self, result_onnx):
+        result_onnx = np.delete(result_onnx, 7)
         class_id = self.softmax(result_onnx).argmax()
         return class_id
 
