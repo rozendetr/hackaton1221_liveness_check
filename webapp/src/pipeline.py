@@ -30,14 +30,21 @@ class NNPipeLine:
         for id_batch, bboxes in enumerate(batch_bboxes):
             frame = batch_imgs[id_batch]
             spoof_bboxes = []
+            real_h, real_w = frame.shape[:2]
             for bbox in bboxes:
                 x_tl, y_tl, x_br, y_br = bbox
                 w_bbox = x_br-x_tl
                 h_bbox = y_br-y_tl
-                frame_crop = frame[y_tl:y_br, x_tl:x_br]
+                xtl = int(x_tl - w_bbox * 0.25)
+                xbr = int(x_br + w_bbox * 0.25)
+                ytl = int(y_tl - h_bbox * 0.25)
+                ybr = int(x_br + h_bbox * 0.25)
+                xtl = 0 if xtl < 0 else xtl
+                ytl = 0 if ytl < 0 else ytl
+                xbr = real_w if xbr > real_w else xbr
+                ybr = real_h if ybr > real_h else ybr
+                frame_crop = frame[ytl:ybr, xtl:xbr]
                 class_id = self.spoof_classificator(frame_crop)
-                if class_id in [7]:
-                    class_id = 0
                 spoof_bbox = [x_tl, y_tl, x_br, y_br, class_id]
                 spoof_bboxes.append(spoof_bbox)
             batch_detections.append(spoof_bboxes)
