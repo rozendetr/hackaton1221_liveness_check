@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <title>PytBools Fake Detection</title>
+</head>
+<body>
+
+<div id = "content" class="container col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12">
+    <center>
+        <h3>Авторизация пользователя</h3>
+        <video id="video" autoplay style="max-width:100%;"></video> <!--width="640" height="480"-->
+        <!--div>
+            <img src ="{{ url_for('video_feed')}}" >
+        </div-->
+        <br>
+        <div class="row">
+            <h4 id="status" class="alert-text col-md-4">REAL / FAKE</h4>
+            <div id="check-btns" class="d-grid gap-2 d-md-flex justify-content-md-end col-md-6">
+                <a id="check-again" class='btn btn-warning btn-lg me-md-2' href="/"> Ещё раз</a>
+                <button id="check-user" type="submit" class="btn btn-primary btn-lg">Распознать</button>
+            </div>
+            <div id="check-info"> <h4>Время распознавания: </h4> </div>
+        </div>
+        <canvas hidden id="canvas"></canvas> <!--width="640" height="480"-->
+    </center>
+</div>
+
+</body>
+
+<script>
+    var video = document.getElementById('video');
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            //video.src = window.URL.createObjectURL(stream);
+            video.srcObject = stream;
+            video.play();
+        });
+    }
+
+    is_clicked = false;
+    document.getElementById("check-user").addEventListener("click", function() {
+        is_clicked = ! is_clicked;
+    });
+
+    setInterval(() => {
+        document.getElementById("status").textContent="FAKE / REAL";
+        var frame_id = 0
+        if (is_clicked == true){
+            document.getElementById("status").textContent="Проверяем";;
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.getElementById('video');
+            var w = video.videoWidth;
+            var h = video.videoHeight;
+            var r = Math.min(w, h)
+            canvas.width = canvas.height = 240;
+            context.drawImage(video, 240/r*(r-w)/2, 240/r*(r-h)/2, 240/r*w, 240/r*h);
+            //alert(w + ' ' +  h + '\n' + canvas.width + ' ' + canvas.height)
+            var request = new XMLHttpRequest();
+            request.open("POST", '/submit');
+            request.setRequestHeader("Content-Type", "application/json"); // is_check_started, true);//
+            var data = {
+                      "width": w,
+                      "height": h,
+                      "frame_id": frame_id,
+                      "data": canvas.toDataURL("image/jpeg")
+                    };
+            request.send(JSON.stringify(data));
+            frame_id  = frame_id +1
+    }}, 250);
+
+</script>
+
+</html>
