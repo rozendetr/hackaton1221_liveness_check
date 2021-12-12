@@ -49,9 +49,24 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def predict(img):
-    imgs = [img]
-    return nn_pipeline(imgs)
+def draw_result(frame, res_predict):
+
+    if not res_predict:
+        return None
+    real_h, real_w = frame.shape[:2]
+    mask_frame = np.zeros((real_h, real_w, 3), dtype=np.uint8)
+    for face_id, face_coord in enumerate(res_predict):
+        print(face_coord)
+        x_tl, y_tl, x_br, y_br, class_id = face_coord
+        w_bbox = x_br-x_tl
+        h_bbox = y_br-y_tl
+
+        if class_id == 0:
+            mask_frame[y_tl:y_br, x_tl:x_br, 1] = 255
+        else:
+            mask_frame[y_tl:y_br, x_tl:x_br, 0] = 255
+    img_union = cv2.addWeighted(frame, 1, mask_frame, 0.7, 0.0)
+    return img_union
 
 
 @app.route('/submit', methods=['POST'])
@@ -66,12 +81,8 @@ def submit():
     im = Image.open(BytesIO(image_bytes))
     cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
     res = nn_pipeline.predict_images([cv_image])
-    # if res:
-    #     res_img = res[0]
-    #     for id_face, face_coord in enumerate(res_img):
-
-
-    print(res)
+    if res:
+        pred_img = draw_result(cv_image, res[0])
 
     # print(content.get("frame_id"))
     # cv2.imwrite("screen2.jpg", cv_image)
