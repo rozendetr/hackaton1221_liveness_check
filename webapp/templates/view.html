@@ -13,20 +13,22 @@
 <div id = "content" class="container col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12">
     <center>
         <h3>Авторизация пользователя</h3>
-        <video id="video" style="max-width:100%; width:480px; height:480px; object-fit: cover;" autoplay ></video> <!--style="max-width:100%;"-->
+        <div class="justify-content-center">
+            <video id="video" class="col-md-6 img-rounded" style="max-width:100%; max-height:100%; width:360px; height:360px; object-fit: cover;" autoplay ></video> <!--style="max-width:100%;"-->
+            <canvas hidden id="canvas" class="col-md-6 img-rounded" style="width:360px; height:360px;"></canvas>
+        </div>
         <!--div>
             <img src ="{{ url_for('video_feed')}}" >
         </div-->
         <br>
         <div class="row">
-            <h4 id="status" class="alert-text col-md-4">REAL / FAKE</h4>
+            <h4 id="status" class="alert-text col-md-offset-2 col-md-4">REAL / FAKE</h4>
             <div id="check-btns" class="d-grid gap-2 d-md-flex justify-content-md-end col-md-6">
                 <a id="check-again" class='btn btn-warning btn-lg me-md-2' href="/"> Ещё раз</a>
                 <button id="check-user" type="submit" class="btn btn-primary btn-lg">Распознать</button>
             </div>
             <div id="check-info"> <h4>Время распознавания: </h4> </div>
         </div>
-        <canvas hidden id="canvas"></canvas>
     </center>
 </div>
 
@@ -42,16 +44,24 @@
         });
     }
 
+    var frame_id = 0
     var is_check_started = false;
     document.getElementById("check-user").addEventListener("click", function() {
         is_check_started = ! is_check_started
+        if (is_check_started){
+            document.getElementById("check-user").textContent="Остановить";
+            document.getElementById("canvas").hidden=false;
+        } else {
+            document.getElementById("check-user").textContent="Распознать";
+            document.getElementById("canvas").hidden=true;
+            document.getElementById("status").textContent = "Кадров - " + frame_id;
+        };
     });
 
-    var frame_id = 0
+    
     setInterval(() => {
         if (is_check_started == true) {
-            document.getElementById("status").textContent="Проверяем. Кадр - " + frame_id;
-            document.getElementById("check-user").textContent="Остановить";
+            document.getElementById("status").textContent = "Кадр - " + frame_id;
             var canvas = document.getElementById('canvas');
             var context = canvas.getContext('2d');
             var video = document.getElementById('video');
@@ -63,7 +73,7 @@
             //alert(w + ' ' +  h + '\n' + canvas.width + ' ' + canvas.height)
             var request = new XMLHttpRequest();
             request.open("POST", '/submit');
-            request.setRequestHeader("Content-Type", "application/json"); // is_check_started, true);//
+            request.setRequestHeader("Content-Type", "application/json");
             var data = {
                       "width": w,
                       "height": h,
@@ -73,8 +83,6 @@
             request.send(JSON.stringify(data));
             frame_id  = frame_id +1;
         } else {
-            document.getElementById("status").textContent="FAKE / REAL";
-            document.getElementById("check-user").textContent="Распознать";
             frame_id = 0;
         }
     }, 250);
