@@ -36,7 +36,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template('view2.html')
+    return render_template('view.html')
 
 @app.route('/video_feed') #TODO  возможно не понадобится
 def video_feed():
@@ -54,8 +54,8 @@ def submit():
     # with open("screen.png", "wb") as f: f.write(image_bytes)
     im = Image.open(BytesIO(image_bytes))
     cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
-    # print(cv_image.shape)
-    # cv2.imwrite("screen2.jpg", cv_image)
+    # print(content.get("frame_id"))
+    cv2.imwrite("screen2.jpg", cv_image)
     return ""
 
 if __name__ == "__main__":

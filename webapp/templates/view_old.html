@@ -20,16 +20,16 @@
         <br>
         <div class="row">
             <h4 id="status" class="alert-text col-md-4">REAL / FAKE</h4>
-            <div id="check-btns" class="d-grid gap-2 d-md-flex justify-content-md-end col-md-6">
+            <div id="check-btns" class="d-grid gap-2 d-md-flex justify-content-md-end col-md-6">       
                 <a id="check-again" class='btn btn-warning btn-lg me-md-2' href="/"> Ещё раз</a>
                 <button id="check-user" type="submit" class="btn btn-primary btn-lg">Распознать</button>
             </div>
             <div id="check-info"> <h4>Время распознавания: </h4> </div>
         </div>
         <canvas hidden id="canvas"></canvas> <!--width="640" height="480"-->
-    </center>
+    </center>  
 </div>
-
+    
 </body>
 
 <script>
@@ -42,14 +42,13 @@
         });
     }
 
-    is_clicked = false;
+    is_clicked = false;        
     document.getElementById("check-user").addEventListener("click", function() {
         is_clicked = ! is_clicked;
     });
 
-    setInterval(() => {
+    setInterval(() => { 
         document.getElementById("status").textContent="FAKE / REAL";
-        var frame_id = 0
         if (is_clicked == true){
             document.getElementById("status").textContent="Проверяем";;
             var canvas = document.getElementById('canvas');
@@ -62,16 +61,8 @@
             context.drawImage(video, 240/r*(r-w)/2, 240/r*(r-h)/2, 240/r*w, 240/r*h);
             //alert(w + ' ' +  h + '\n' + canvas.width + ' ' + canvas.height)
             var request = new XMLHttpRequest();
-            request.open("POST", '/submit');
-            request.setRequestHeader("Content-Type", "application/json"); // is_check_started, true);//
-            var data = {
-                      "width": w,
-                      "height": h,
-                      "frame_id": frame_id,
-                      "data": canvas.toDataURL("image/jpeg")
-                    };
-            request.send(JSON.stringify(data));
-            frame_id  = frame_id +1
+            request.open('POST', '/submit?image=' + canvas.toDataURL(), true); // is_check_started, true);//
+            request.send();
     }}, 250);
 
 </script>
