@@ -1,4 +1,6 @@
+
 from flask import Flask, render_template, request, Response, send_file
+
 
 # import face_recognition
 import cv2
@@ -34,10 +36,11 @@ class VideoCamera(object): #TODO  возможно не понадобится
 
 
 def gen(camera):
-    while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+    #while True:
+    #    frame = camera.get_frame()
+    #    yield (b'--frame\r\n'
+    #           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+    print()
 
 app = Flask(__name__)
 
@@ -50,6 +53,7 @@ def video_feed():
     return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+#cv_image = ''
 
 def draw_result(frame, res_predict, proc_time):
 
@@ -88,7 +92,7 @@ def generate_image():
     # image =  Image.fromarray(pred_img.astype('uint8'))
     # convert to file-like data
     obj = BytesIO()             # file in memory to save image without using disk  #
-    image.save(obj, format='png')  # save in file (BytesIO)                           # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save
+    image.save(obj, format='png')  # save in file (BytesIO)
     obj.seek(0)                    # move to beginning of file (BytesIO) to read it   #
     return obj
 
@@ -135,6 +139,8 @@ def get_image():
     # # move to beginning of file so `send_file()` it will read from start
     # file_object.seek(0)
     return send_file(file_object, mimetype='image/jpeg')
+
+
 
 
 if __name__ == "__main__":
