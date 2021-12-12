@@ -57,27 +57,19 @@ def submit():
     im = Image.open(BytesIO(image_bytes))
     cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
     # print(content.get("frame_id"))
-    cv2.imwrite("screen.png", cv_image)
+    # cv2.imwrite("screen.png", cv_image)
     return ""
 
 @app.route('/get_image')
 def get_image():
-    # my numpy array 
-    arr = np.array(raw_data)
-
-    # convert numpy array to PIL Image
-    img = Image.fromarray(arr.astype('uint8'))
-
-    # create file-object in memory
-    file_object = BytesIO()
-
-    # write PNG in file-object
-    img.save(file_object, 'PNG')
-
+    img = Image.fromarray(cv_image)
+    
+    file_object = BytesIO()         # create file-object in memory
+    img.save(file_object, 'PNG')    # write PNG in file-object
     # move to beginning of file so `send_file()` it will read from start    
     file_object.seek(0)
 
-    return send_file(BytesIO(image_binary), mimetype='image/jpeg')
+    return send_file(BytesIO(file_object), mimetype='image/jpeg')
 
 if __name__ == "__main__":
     app.run()
