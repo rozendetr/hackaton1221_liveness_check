@@ -44,7 +44,7 @@ def video_feed():
     return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-cv_image = ''
+    imgs = [img]
 @app.route('/submit', methods=['POST'])
 def submit():
     content = request.get_json()
