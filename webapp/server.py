@@ -6,12 +6,17 @@ import numpy as np
 import base64 # для перевода из формата 
 from PIL import Image
 from io import BytesIO
+from src.pipeline import *
+
 
 # from pyngrok import conf, ngrok
 # if False: # если будет лень запускать ngrok из командной строки
 #     conf.get_default().region = "eu"
 #     http_tunnel = ngrok.connect(5000, 'http')
 #     print(http_tunnel)
+
+
+
 
 class VideoCamera(object): #TODO  возможно не понадобится
     def __init__(self):
@@ -44,7 +49,13 @@ def video_feed():
     return Response(gen(VideoCamera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+#cv_image = ''
+
+def predict(img):
     imgs = [img]
+    return nn_pipeline(imgs)
+
+
 @app.route('/submit', methods=['POST'])
 def submit():
     content = request.get_json()
@@ -56,6 +67,14 @@ def submit():
     # with open("screen.png", "wb") as f: f.write(image_bytes)
     im = Image.open(BytesIO(image_bytes))
     cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
+    res = nn_pipeline.predict_images([cv_image])
+    # if res:
+    #     res_img = res[0]
+    #     for id_face, face_coord in enumerate(res_img):
+
+
+    print(res)
+
     # print(content.get("frame_id"))
     # cv2.imwrite("screen.png", cv_image)
     return ""
@@ -72,4 +91,8 @@ def get_image():
     return send_file(BytesIO(file_object), mimetype='image/jpeg')
 
 if __name__ == "__main__":
+    detector = SSD(pb_path=r"./frozen_inference_graph.pb", input_res=(640, 640), detector_margin=0.0)
+    spoof_classificator = LivenessSpoof(weights=r"./2021-12-12-04-19_Anti_Spoofing_4_0_0_224x224_model_iter-12500.onnx")
+    nn_pipeline = NNPipeLine(detector=detector,
+                             spoof_classificator=spoof_classificator)
     app.run()
