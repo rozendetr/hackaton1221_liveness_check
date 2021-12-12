@@ -15,7 +15,7 @@
         <h3>Авторизация пользователя</h3>
         <div class="justify-content-center">
             <video id="video" class="col-md-6 img-rounded" style="max-width:100%; max-height:100%; width:360px; height:360px; object-fit: cover;" autoplay ></video> <!--style="max-width:100%;"-->
-            <canvas hidden id="canvas" class="col-md-6 img-rounded" style="width:360px; height:360px;"></canvas>
+            <canvas hidden id="canvas" class="col-md-6 img-rounded" style="max-width:100%; max-height:100%; width:360px; height:360px;"></canvas>
         </div>
         <!--div>
             <img src ="{{ url_for('video_feed')}}" >
@@ -29,6 +29,7 @@
             </div>
             <div id="check-info"> <h4>Время распознавания: </h4> </div>
         </div>
+        <canvas hidden id="canvas_to_send"></canvas>
     </center>
 </div>
 
@@ -58,30 +59,53 @@
         };
     });
 
-    
+
     setInterval(() => {
         if (is_check_started == true) {
             document.getElementById("status").textContent = "Кадр - " + frame_id;
-            var canvas = document.getElementById('canvas');
-            var context = canvas.getContext('2d');
+            var canvas_to_send = document.getElementById('canvas_to_send');
+            var context_to_send = canvas_to_send.getContext('2d');
             var video = document.getElementById('video');
             var w = video.videoWidth;
             var h = video.videoHeight;
             var r = Math.min(w, h);
-            canvas.width = canvas.height = 240;
-            context.drawImage(video, 240/r*(r-w)/2, 240/r*(r-h)/2, 240/r*w, 240/r*h);
+            canvas_to_send.width = canvas_to_send.height = 240;
+            context_to_send.drawImage(video, 240/r*(r-w)/2, 240/r*(r-h)/2, 240/r*w, 240/r*h);
             //alert(w + ' ' +  h + '\n' + canvas.width + ' ' + canvas.height)
-            var request = new XMLHttpRequest();
-            request.open("POST", '/submit');
-            request.setRequestHeader("Content-Type", "application/json");
+            var request_post = new XMLHttpRequest();
+            request_post.open("POST", '/submit');
+            request_post.setRequestHeader("Content-Type", "application/json");
             var data = {
                       "width": w,
                       "height": h,
                       "frame_id": frame_id,
-                      "data": canvas.toDataURL("image/jpeg")
+                      "data": canvas_to_send.toDataURL("image/jpeg")
                     };
-            request.send(JSON.stringify(data));
+            request_post.send(JSON.stringify(data));
             frame_id  = frame_id +1;
+
+            var img = new Image();
+            //img.src = "/get_image";
+            img.src = "/get_image?t=" + new Date().getTime();
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            img.onload = function() {
+                img.style.display = 'none'; // I don't know why they hide it
+                context.drawImage(img, 0, 0);   // draw on canvas
+                var imageData = context.getImageData(0, 0, 640, 640)
+                context.putImageData(imageData, 0, 0);
+
+            };
+            //var request_get = new XMLHttpRequest();
+            //request_get.open("GET", '/submit');
+            //request_get.setRequestHeader("Content-Type", "application/json");
+            //var data = {
+            //          "width": w,
+            //          "height": h,
+            //          "frame_id": frame_id,
+            //          "data": canvas.toDataURL("image/jpeg")
+            //        };
+            //request_get.send(JSON.stringify(data));
         } else {
             frame_id = 0;
         }

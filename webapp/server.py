@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, send_file
 
 # import face_recognition
 import cv2
@@ -77,8 +77,22 @@ def draw_result(frame, res_predict, proc_time):
                 2)
     return img_union
 
+pred_img = None
 
-@app.route('/submit', methods=['POST', 'GET'])
+def generate_image():
+    """Get image from url. Read to Pillow. Draw. Save in BytesIO"""
+    # read to pillow
+    image = Image.open("screen2.jpg")  #
+    # if image:
+    #     print(image.size)
+    # image =  Image.fromarray(pred_img.astype('uint8'))
+    # convert to file-like data
+    obj = BytesIO()             # file in memory to save image without using disk  #
+    image.save(obj, format='png')  # save in file (BytesIO)                           # https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save
+    obj.seek(0)                    # move to beginning of file (BytesIO) to read it   #
+    return obj
+
+@app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
         content = request.get_json()
@@ -96,13 +110,31 @@ def submit():
         proc_time = round(proc_time, 3)
         if res:
             pred_img = draw_result(cv_image, res[0], proc_time)
-            cv2.imwrite("pred_img.jpg", pred_img)
+            cv2.imwrite("screen2.jpg", pred_img)
+            # cv2.imwrite("pred_img.jpg", pred_img)
+            # im_pil = Image.fromarray(pred_img)
+            # file_object = BytesIO()
+            # im_pil.save(file_object, 'PNG')  # save as PNG in file in memory
+            # file_object.seek(0)
+            # return send_file(file_object, mimetype='image/png')
 
-        # print(content.get("frame_id"))
+            # print(content.get("frame_id"))
         # cv2.imwrite("screen2.jpg", cv_image)
         return ""
 
 
+@app.route('/get_image', methods=['GET'])
+def get_image():
+    file_object = generate_image()
+    # img = Image.open("screen.jpg")
+    # print(type(img))
+    # img = cv2.cvtColor(cv_image.copy(), cv2.COLOR_BGR2GRAY)
+    # print(type(cv_image))
+    # file_object = BytesIO()         # create file-object in memory
+    # img.save(file_object, 'JPEG')    # write JPG in file-object
+    # # move to beginning of file so `send_file()` it will read from start
+    # file_object.seek(0)
+    return send_file(file_object, mimetype='image/jpeg')
 
 
 if __name__ == "__main__":
