@@ -7,6 +7,7 @@ import base64 # для перевода из формата
 from PIL import Image
 from io import BytesIO
 from src.pipeline import *
+import time
 
 
 # from pyngrok import conf, ngrok
@@ -50,7 +51,7 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def draw_result(frame, res_predict):
+def draw_result(frame, res_predict, proc_time):
 
     if not res_predict:
         return None
@@ -65,29 +66,43 @@ def draw_result(frame, res_predict):
         if class_id == 0:
             mask_frame[y_tl:y_br, x_tl:x_br, 1] = 255
         else:
-            mask_frame[y_tl:y_br, x_tl:x_br, 0] = 255
-    img_union = cv2.addWeighted(frame, 1, mask_frame, 0.7, 0.0)
+            mask_frame[y_tl:y_br, x_tl:x_br, 2] = 255
+    img_union = cv2.addWeighted(frame, 1, mask_frame, 0.5, 0.0)
+    cv2.putText(img_union, str(proc_time),
+                (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0,0,255),
+                1,
+                2)
     return img_union
 
 
-@app.route('/submit', methods=['POST'])
+@app.route('/submit', methods=['POST', 'GET'])
 def submit():
-    content = request.get_json()
-    # print(content)
-    # image_str = request.args.get('image').replace(' ', '+')
-    image_str = content.get("data").replace(' ', '+')
-    image_str = image_str.split(',', maxsplit=1)[1]
-    image_bytes = base64.b64decode(image_str.encode('ascii'))
-    # with open("screen.png", "wb") as f: f.write(image_bytes)
-    im = Image.open(BytesIO(image_bytes))
-    cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
-    res = nn_pipeline.predict_images([cv_image])
-    if res:
-        pred_img = draw_result(cv_image, res[0])
+    if request.method == 'POST':
+        content = request.get_json()
+        # print(content)
+        # image_str = request.args.get('image').replace(' ', '+')
+        image_str = content.get("data").replace(' ', '+')
+        image_str = image_str.split(',', maxsplit=1)[1]
+        image_bytes = base64.b64decode(image_str.encode('ascii'))
+        # with open("screen.png", "wb") as f: f.write(image_bytes)
+        im = Image.open(BytesIO(image_bytes))
+        cv_image = cv2.cvtColor(np.asarray(im), cv2.COLOR_BGR2RGB)
+        start_time = time.time()
+        res = nn_pipeline.predict_images([cv_image])
+        proc_time = time.time() - start_time
+        proc_time = round(proc_time, 3)
+        if res:
+            pred_img = draw_result(cv_image, res[0], proc_time)
+            cv2.imwrite("pred_img.jpg", pred_img)
 
-    # print(content.get("frame_id"))
-    # cv2.imwrite("screen2.jpg", cv_image)
-    return ""
+        # print(content.get("frame_id"))
+        # cv2.imwrite("screen2.jpg", cv_image)
+        return ""
+
+
 
 
 if __name__ == "__main__":

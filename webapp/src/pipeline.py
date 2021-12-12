@@ -5,6 +5,7 @@ from .detector import *
 from .classificator import *
 import uuid
 import os
+import time
 
 
 
@@ -16,13 +17,14 @@ class NNPipeLine:
         self.logger = logger
         self.detector = detector
         self.spoof_classificator = spoof_classificator
-        self.setting = {"detect_face_threshold": 0.3,
-                        "min_face_size": 5}
+        self.setting = {"detect_face_threshold": 0.2,
+                        "min_face_size": 3}
 
     def predict_images(self, batch_imgs: list):
         batch_bboxes = self.detector(batch_imgs,
-                                     detector_threshold=self.setting.get("detect_face_threshold", 0.3),
-                                     min_size_object=self.setting.get("min_face_size", 5))
+                                     detector_threshold=self.setting.get("detect_face_threshold", 0.2),
+                                     min_size_object=self.setting.get("min_face_size", 3))
+
         if not batch_bboxes:
             return None
 
