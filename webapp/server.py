@@ -10,6 +10,7 @@ from src.pipeline import *
 
 
 # from pyngrok import conf, ngrok
+#
 # if False: # если будет лень запускать ngrok из командной строки
 #     conf.get_default().region = "eu"
 #     http_tunnel = ngrok.connect(5000, 'http')
@@ -87,6 +88,7 @@ def submit():
     # print(content.get("frame_id"))
     # cv2.imwrite("screen2.jpg", cv_image)
     return ""
+
 
 if __name__ == "__main__":
     detector = SSD(pb_path=r"./frozen_inference_graph.pb", input_res=(640, 640), detector_margin=0.0)
